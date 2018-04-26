@@ -46,17 +46,7 @@
             <artifactId>spark-sql_2.10</artifactId>
             <version>1.6.0-cdh5.11.2</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.tdunning</groupId>
-            <artifactId>json</artifactId>
-            <version>1.8</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>2.2.0</version>
-        </dependency>
+        
 
     </dependencies>
 
