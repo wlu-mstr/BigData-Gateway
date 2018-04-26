@@ -8,9 +8,10 @@ import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapreduce._
 import org.apache.phoenix.mapreduce.PhoenixOutputCommitter
 import org.apache.phoenix.mapreduce.util.{ConnectionUtil, PhoenixConfigurationUtil}
+import org.apache.phoenix.util.{ColumnInfo, QueryUtil}
 
 import scala.collection.mutable
-
+import collection.JavaConversions._
 
 
 class MultiTablePhoenixRecordWriter(configuration: Configuration) extends RecordWriter[NullWritable, MultiTalbePhoenixRecordWritable] {
@@ -21,24 +22,24 @@ class MultiTablePhoenixRecordWriter(configuration: Configuration) extends Record
   var numRecords: mutable.Map[String, Long] = mutable.Map[String, Long]()
   var upsertStatements: mutable.Map[String, PreparedStatement] = mutable.Map[String, PreparedStatement]()
 
-  def getPreparedStatement(tableName: String): PreparedStatement = {
+  def getPreparedStatement(tableName: String, colmInfos: List[ColumnInfo]): PreparedStatement = {
     val statement = upsertStatements.get(tableName)
     if (statement.nonEmpty) {
       return statement.get
     }
-    val upsertSql = configuration.get(Util.upsertStatementKey(tableName))
-    if (upsertSql == null) {
-      null
-    } else {
-      val statement: PreparedStatement = connection.prepareStatement(upsertSql)
-      upsertStatements(tableName) = statement
-      statement
-    }
+    val upsertSql = configuration.get(Util.upsertStatementKey(tableName), QueryUtil.constructUpsertStatement(tableName, colmInfos))
+
+
+    val newStatement = connection.prepareStatement(upsertSql)
+    upsertStatements(tableName) = newStatement
+
+    newStatement
+
   }
 
   override def write(key: NullWritable, value: MultiTalbePhoenixRecordWritable): Unit = {
     val tableName = value.getTableName
-    val preparedStatement = getPreparedStatement(tableName)
+    val preparedStatement = getPreparedStatement(tableName, value.columnMetaDataList)
     if (preparedStatement == null) {
       LOG.error(s"Can't find upsert statement for table $tableName")
       return
@@ -48,6 +49,7 @@ class MultiTablePhoenixRecordWriter(configuration: Configuration) extends Record
 
     val currNum: Long = numRecords.getOrElse(tableName, 0L) + 1L
 
+    println(preparedStatement)
     preparedStatement.execute()
     if (currNum % batchSize == 0) {
       connection.commit()

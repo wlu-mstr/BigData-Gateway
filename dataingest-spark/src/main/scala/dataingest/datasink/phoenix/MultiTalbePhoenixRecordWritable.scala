@@ -2,7 +2,7 @@ package dataingest.datasink.phoenix
 
 import java.sql.PreparedStatement
 
-import org.apache.phoenix.schema.types.{PBinary, PDataType, PDate, PVarbinary}
+import org.apache.phoenix.schema.types._
 import org.apache.phoenix.util.ColumnInfo
 import org.joda.time.DateTime
 
@@ -22,7 +22,7 @@ class MultiTalbePhoenixRecordWritable(val tableName: String, val columnMetaDataL
         s"Upsert values ($upsertValues) do not match the specified columns (columnMetaDataList)"
       )
     }
-
+    
     // Correlate each value (v) to a column type (c) and an index (i)
     upsertValues.zip(columnMetaDataList).zipWithIndex.foreach {
       case ((v, c), i) =>

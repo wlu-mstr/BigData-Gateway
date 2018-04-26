@@ -45,6 +45,7 @@ class MultiTableProductRDDFunctions[V <: InternalRow](data: RDD[(String, V)]) ex
       }
     }
 
+    phxRDD.foreach(println)
     // Save it
     phxRDD.saveAsNewAPIHadoopFile(
       "",

@@ -30,8 +30,7 @@ object JacksonParser {
     try f.apply(resource) finally resource.close()
   }
 
-  def parse(
-             input: String,
+  def parse(input: String,
              schema: StructType,
              columnNameOfCorruptRecords: String = "_corrupt_record",
              configOptions: JSONOptions = JSONOptions.createFromConfigMap(Map.empty)): InternalRow = {
@@ -43,8 +42,7 @@ object JacksonParser {
   /**
     * Parse the current token (and related children) according to a desired schema
     */
-  def convertField(
-                    factory: JsonFactory,
+  def convertField(factory: JsonFactory,
                     parser: JsonParser,
                     schema: DataType): Any = {
     import com.fasterxml.jackson.core.JsonToken._
@@ -57,7 +55,7 @@ object JacksonParser {
         convertField(factory, parser, schema)
 
       case (VALUE_STRING, StringType) =>
-        UTF8String.fromString(parser.getText)
+        parser.getText
 
       case (VALUE_STRING, _) if parser.getTextLength < 1 =>
         // guard the non string type
@@ -72,18 +70,14 @@ object JacksonParser {
           // The format of this string will probably be "yyyy-mm-dd".
           DateTimeUtils.millisToDays(DateTimeUtils.stringToTime(parser.getText).getTime)
         } else {
-          // In Spark 1.5.0, we store the data as number of days since epoch in string.
-          // So, we just convert it to Int.
           stringValue.toInt
         }
 
       case (VALUE_STRING, TimestampType) =>
-        // This one will lose microseconds parts.
-        // See https://issues.apache.org/jira/browse/SPARK-10681.
-        DateTimeUtils.stringToTime(parser.getText).getTime * 1000L
+        DateTimeUtils.stringToTime(parser.getText).getTime
 
       case (VALUE_NUMBER_INT, TimestampType) =>
-        parser.getLongValue * 1000L
+        parser.getLongValue
 
       case (_, StringType) =>
         val writer = new ByteArrayOutputStream()
@@ -259,9 +253,7 @@ object JacksonParser {
           convertField(factory, parser, schema) match {
             case null => failedRecord(record)
             case row: InternalRow => row
-
-            case _ =>
-              failedRecord(record)
+            case _ => failedRecord(record)
           }
         }
       } catch {

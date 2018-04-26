@@ -37,7 +37,7 @@ object DataIngestProcessor {
           itr => convertToMessage(itr, schemaConfigBroadcast)
         )
 
-        //rawJsonMsg.saveToPhoenix(zkUrl = Some("localhost:2181"))
+        rawJsonMsg.saveToPhoenix(zkUrl = Some("localhost:2181"))
         rawJsonMsg.foreach(println)
 
 
