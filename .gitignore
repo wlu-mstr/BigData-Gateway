@@ -29,3 +29,6 @@ CSV_EXPORT/
 
 checkpoint-ipo*
 .DS_Store
+
+# vim stuff
+*~
