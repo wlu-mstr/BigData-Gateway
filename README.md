@@ -48,6 +48,8 @@ A http service for data query. Only data ingested to the system are avalible for
 
 ## multi-dimensional modeling
 
+
+
 ## dataanalysis-gateway [may have supported by datalake]
 A http service for data analysis based on Hive
 - aggregation of ingested data
